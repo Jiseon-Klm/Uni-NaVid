@@ -141,7 +141,7 @@ Find the **EVT-bench** evaluation code [here](https://github.com/wsakobe/TrackVL
 | Evaliation Benchmark |  SR  |  TR  |  CR  | 
 |----------------------|:----:|:----:|:----:|
 | Uni-NaVid EVT-Bench STT  | 53.3 | 67.2 | 12.6 | 
-| Uni-NaVid EVT-Bench STT  | 31.9 | 50.1 | 21.3 | 
+| Uni-NaVid EVT-Bench DT  | 31.9 | 50.1 | 21.3 | 
 | Uni-NaVid EVT-Bench AT   | 15.8 | 41.5 | 26.5 | 
 
 
