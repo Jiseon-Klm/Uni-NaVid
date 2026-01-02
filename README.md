@@ -20,13 +20,14 @@ https://github.com/user-attachments/assets/304a512f-bfac-46e2-b293-f2e1e8b04f63 
 ## Execution
 ```
 docker run -it \
+    --name navid_container \
     --privileged \
     --net=host \
     --gpus all \
     -e DISPLAY=$DISPLAY \
     -e QT_X11_NO_MITSHM=1 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /home/prcnsi/Desktop/When2Reason:/when2reason \
+    -v /home/aprl/Desktop/when2reason:/when2reason \
     -w /when2reason \
     when2reason
 ```
