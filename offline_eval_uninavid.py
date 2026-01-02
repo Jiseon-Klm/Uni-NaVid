@@ -269,14 +269,15 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument('test_case', help='test case path (images dir)')
-    parser.add_argument('output_dir', help='output dir to save results')
+    parser.add_argument('output_dir', nargs='?', default='output_dir', help='output dir to save results (default: output_dir)')
     
 
     
     args = parser.parse_args()
     
-    # Create output directory if it doesn't exist
-    os.makedirs(args.output_dir, exist_ok=True)
+    # Create output directory if it doesn't exist (convert to absolute path)
+    output_dir = os.path.abspath(args.output_dir)
+    os.makedirs(output_dir, exist_ok=True)
     
     agent = UniNaVid_Agent("/when2reason/model_zoo")
     agent.reset()
@@ -305,4 +306,6 @@ if __name__ == '__main__':
         result_vis_list.append(vis)
 
     
-    imageio.mimsave(os.path.join(args.output_dir,"result.gif"), result_vis_list)
+    # Ensure output directory exists before saving
+    os.makedirs(output_dir, exist_ok=True)
+    imageio.mimsave(os.path.join(output_dir, "result.gif"), result_vis_list)
