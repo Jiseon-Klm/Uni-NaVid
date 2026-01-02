@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uninavid"
+version = "1.0"
+description = "Uni-NaVid"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+]
+dependencies = [
+    "einops==0.6.1",
+    "einops-exts==0.0.4",
+    "numpy<2",
+    "requests",
+    "timm==0.6.13",
+    "scikit-learn==1.2.2",
+    "fairscale",
+
+    "transformers==4.31.0",
+    "accelerate==0.21.0",
+    "peft==0.4.0",
+    "tokenizers>=0.12.1,<0.14",
+    "sentencepiece==0.1.99",
+
+    "fastapi",
+    "uvicorn",
+    "gradio==3.35.2",
+    "gradio_client==0.2.9",
+    "markdown2[all]",
+    "httpx==0.24.0",
+    "shortuuid",
+    "wandb",
+
+    "deepspeed==0.9.5",
+    "bitsandbytes==0.48.0",
+]
+
+[tool.setuptools.packages.find]
+exclude = [
+    "assets*", "benchmark*", "docs", "dist*", "playground*", "scripts*",
+    "tests*", "data*", "work_dirs*", "model_zoo*"
+]
+
+[tool.wheel]
+exclude = [
+    "assets*", "benchmark*", "docs", "dist*", "playground*", "scripts*",
+    "tests*", "data*", "work_dirs*", "model_zoo*"
+]

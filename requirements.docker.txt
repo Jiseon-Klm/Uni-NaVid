@@ -1,0 +1,33 @@
+# core
+einops==0.6.1
+einops-exts==0.0.4
+numpy<2
+requests
+timm==0.6.13
+scikit-learn==1.2.2
+fairscale
+
+# HF stack (Uni-NaVid 원본 호환 유지)
+transformers==4.31.0
+accelerate==0.21.0
+peft==0.4.0
+
+# tokenizers / sentencepiece (원본과 동일하게 유지)
+tokenizers>=0.12.1,<0.14
+sentencepiece==0.1.99
+
+# serving / demo
+fastapi
+uvicorn
+gradio==3.35.2
+gradio_client==0.2.9
+markdown2[all]
+httpx==0.24.0
+shortuuid
+wandb
+
+# deepspeed
+deepspeed==0.9.5
+
+# quantization (필요 없으면 주석 처리 가능)
+bitsandbytes==0.48.0
