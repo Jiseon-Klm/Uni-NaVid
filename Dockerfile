@@ -124,5 +124,42 @@ RUN git clone https://github.com/IntelRealSense/librealsense.git /tmp/librealsen
     cp $PY_SITE/pyrealsense2/pyrealsense2*.so $PY_SITE/ && \
     rm -rf /tmp/librealsense
     
-CMD ["/bin/bash"]
+    # ---- ROS2 Setup (OS 버전에 맞춰 Humble/Jazzy 자동 선택) ----
+# 1. 리포지토리 설정 및 키 등록
+RUN apt-get update && apt-get install -y software-properties-common && \
+    add-apt-repository -y universe && \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
+# 2. OS 버전에 따른 ROS 배포판 감지 및 설치
+# Ubuntu 22.04(jammy) -> humble / Ubuntu 24.04(noble) -> jazzy
+RUN export UBUNTU_CODENAME=$(. /etc/os-release && echo $UBUNTU_CODENAME) && \
+    if [ "$UBUNTU_CODENAME" = "jammy" ]; then \
+        export ROS_DISTRO=humble; \
+    elif [ "$UBUNTU_CODENAME" = "noble" ]; then \
+        export ROS_DISTRO=jazzy; \
+    fi && \
+    echo "Selected ROS_DISTRO: $ROS_DISTRO for $UBUNTU_CODENAME" && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    ros-${ROS_DISTRO}-ros-base \
+    ros-dev-tools \
+    python3-colcon-common-extensions \
+    ros-${ROS_DISTRO}-realsense2-camera \
+    && rm -rf /var/lib/apt/lists/* && \
+    echo $ROS_DISTRO > /tmp/ros_distro_name
+
+# 3. venv와 ROS2 환경 병합 (PYTHONPATH 유지)
+# NGC 25.11-py3는 Ubuntu 24.04(Jazzy)일 가능성이 높으므로 기본값을 jazzy로 설정하되,
+# 필요시 수동으로 humble로 변경 가능합니다.
+ENV ROS_DISTRO=jazzy
+ENV AMENT_PREFIX_PATH=/opt/ros/${ROS_DISTRO}
+ENV COLCON_PREFIX_PATH=/opt/ros/${ROS_DISTRO}
+ENV LD_LIBRARY_PATH=/opt/ros/${ROS_DISTRO}/lib:${LD_LIBRARY_PATH}
+ENV PATH=/opt/ros/${ROS_DISTRO}/bin:${PATH}
+# venv 내부에서 시스템 ROS 패키지를 import할 수 있도록 설정
+ENV PYTHONPATH=/opt/ros/${ROS_DISTRO}/lib/python3/dist-packages:${PYTHONPATH}
+
+# 4. Entrypoint 및 환경 설정
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+
+CMD ["/bin/bash"]
