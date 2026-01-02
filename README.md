@@ -24,7 +24,6 @@ docker run -it \
     --privileged \
     --net=host \
     -v /dev:/dev \
-    --network host \
     --gpus all \
     -e DISPLAY=$DISPLAY \
     -e QT_X11_NO_MITSHM=1 \
