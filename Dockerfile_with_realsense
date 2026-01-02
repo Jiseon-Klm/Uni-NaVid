@@ -95,12 +95,18 @@ if torch.cuda.is_available():
 else:
     print("CUDA not available inside container (check --gpus all / nvidia-container-runtime)")
 PY
-# 1. 의존성 설치 (이미 일부 설치되어 있다면 중복 제외)
+
+# ---- Intel RealSense SDK (librealsense2) Full Setup ----
+# 1. 필수 의존성 설치 (OpenSSL, USB, 그래픽 라이브러리 포함)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libssl-dev libusb-1.0-0-dev libudev-dev pkg-config libgtk-3-dev \
+    libssl-dev libusb-1.0-0-dev pkg-config \
+    libgtk-3-dev libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev \
+    libx11-dev libxcursor-dev libxinerama-dev libxrandr-dev libxi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. librealsense 소스 빌드 (Python 바인딩 포함)
+# 2. 소스 빌드 및 설치 (GUI 도구 및 Python 바인딩 포함)
+# FORCE_RSUSB_BACKEND: 커널 패치 없이 Docker에서 장치 인식을 위해 필수
+# BUILD_GRAPHICAL_EXAMPLES: realsense-viewer 빌드를 위해 필수
 RUN git clone https://github.com/IntelRealSense/librealsense.git /tmp/librealsense && \
     cd /tmp/librealsense && \
     mkdir build && cd build && \
@@ -108,13 +114,14 @@ RUN git clone https://github.com/IntelRealSense/librealsense.git /tmp/librealsen
         -DCMAKE_BUILD_TYPE=Release \
         -DBUILD_PYTHON_BINDINGS:bool=true \
         -DPYTHON_EXECUTABLE=$(which python) \
-        -DBUILD_EXAMPLES:bool=false \
-        -DBUILD_GRAPHICAL_EXAMPLES:bool=false && \
+        -DBUILD_EXAMPLES:bool=true \
+        -DBUILD_GRAPHICAL_EXAMPLES:bool=true \
+        -DFORCE_RSUSB_BACKEND=true && \
     make -j$(nproc) && \
     make install && \
+    ldconfig && \
+    PY_SITE=$(python -c "import site; print(site.getsitepackages()[0])") && \
+    cp $PY_SITE/pyrealsense2/pyrealsense2*.so $PY_SITE/ && \
     rm -rf /tmp/librealsense
-
-# 3. 라이브러리 경로 설정 (Python이 빌드된 .so 파일을 찾을 수 있게 함)
-# 빌드된 파일 위치는 보통 /usr/local/lib 에 저장됩니다.
-ENV PYTHONPATH=$PYTHONPATH:/usr/local/lib
+    
 CMD ["/bin/bash"]
