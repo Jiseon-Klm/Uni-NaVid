@@ -162,4 +162,21 @@ ENV PYTHONPATH=/opt/ros/${ROS_DISTRO}/lib/python3/dist-packages:${PYTHONPATH}
 # 4. Entrypoint 및 환경 설정
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 
+# ---- Final Environment Patch (HPC-X / UCC Symbol Fix) ----
+
+# 1. LD_PRELOAD를 완전히 비워서 'cannot open shared object file' 에러 방지
+ENV LD_PRELOAD=""
+
+# 2. HPC-X 경로를 LD_LIBRARY_PATH의 최상단(맨 앞)으로 강제 배치
+# ROS2 경로(/opt/ros/...)보다도 앞에 있어야 심볼 충돌을 막을 수 있습니다.
+ENV LD_LIBRARY_PATH=/opt/hpcx/ucx/lib:/opt/hpcx/ucc/lib:${LD_LIBRARY_PATH}
+
+# 3. PyTorch UCC 통신 에러 방지용 (안정성 확보)
+ENV TORCH_UCC_DISABLE=1
+
+# (선택) 컨테이너 접속 시마다 자동으로 적용되도록 .bashrc에도 추가
+RUN echo 'export LD_PRELOAD=""' >> ~/.bashrc && \
+    echo 'export LD_LIBRARY_PATH=/opt/hpcx/ucx/lib:/opt/hpcx/ucc/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+
 CMD ["/bin/bash"]
