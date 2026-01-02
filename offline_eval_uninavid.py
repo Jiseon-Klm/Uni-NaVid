@@ -279,7 +279,7 @@ if __name__ == '__main__':
     output_dir = os.path.abspath(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
-    agent = UniNaVid_Agent("/when2reason/model_zoo")
+    agent = UniNaVid_Agent("./model_zoo")
     agent.reset()
      
     images = get_sorted_images(args.test_case)
