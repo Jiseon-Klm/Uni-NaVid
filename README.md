@@ -31,6 +31,47 @@ docker run -it \
     when2reason
 ```
 
+## Reproduce result (vln/test_case)
+```
+Total 36 images
+step 1 inference time 1.739469051361084
+step 2 inference time 1.7401456832885742
+step 3 inference time 1.5051002502441406
+step 4 inference time 1.9687855243682861
+step 5 inference time 1.726628065109253
+step 6 inference time 0.947462797164917
+step 7 inference time 1.0341215133666992
+step 8 inference time 1.5056328773498535
+step 9 inference time 1.0341827869415283
+step 10 inference time 1.7389788627624512
+step 11 inference time 1.3480875492095947
+step 12 inference time 2.522409200668335
+step 13 inference time 84.17446517944336
+step 14 inference time 2.2372026443481445
+step 15 inference time 1.1967601776123047
+step 16 inference time 1.2066388130187988
+step 17 inference time 0.4810328483581543
+step 18 inference time 1.7357473373413086
+step 19 inference time 17.977401733398438
+step 20 inference time 1.2808616161346436
+step 21 inference time 85.0175130367279
+step 22 inference time 4.474096298217773
+step 23 inference time 0.8890559673309326
+step 24 inference time 1.3718831539154053
+step 25 inference time 3.900692939758301
+step 26 inference time 84.92400217056274
+step 27 inference time 0.4976844787597656
+step 28 inference time 1.2888250350952148
+step 29 inference time 1.6021029949188232
+step 30 inference time 0.4815680980682373
+step 31 inference time 85.26530909538269
+step 32 inference time 2.0947341918945312
+step 33 inference time 85.42537641525269
+step 34 inference time 2.8887200355529785
+step 35 inference time 3.2006418704986572
+step 36 inference time 3.664170026779175
+
+```
 ## Cotents 
 
 - [Install](#Install)
