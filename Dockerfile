@@ -83,6 +83,7 @@ REQ
 
 ENV DS_BUILD_OPS=0
 RUN pip install --no-cache-dir -r /tmp/requirements.dgx_spark.txt
+RUN pip install imageio
 
 # ---- sanity check: torch/cuda/device capability ----
 RUN python - <<'PY'
