@@ -35,10 +35,10 @@ docker run -it \
 - reconnect the container
 ```
 # 1. 컨테이너 시작
-docker start navid_container
+docker start merged_navid_container
 
 # 2. 실행 중인 컨테이너에 접속
-docker exec -it navid_container bash
+docker exec -it merged_navid_container bash
 ```
 
 ## Reproduce result (vln/test_case)
