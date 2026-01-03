@@ -82,6 +82,48 @@ step 35 inference time 3.2006418704986572
 step 36 inference time 3.664170026779175
 ```
 
+- inference time's vary according to visualization module 
+```
+Total 36 images
+step 1 inference time 7.636366128921509
+step 2 inference time 9.774767637252808
+step 3 inference time 8.606340885162354
+step 4 inference time 11.943239688873291
+step 5 inference time 9.865652322769165
+step 6 inference time 5.315337657928467
+step 7 inference time 5.859358072280884
+step 8 inference time 8.585879564285278
+step 9 inference time 5.81484055519104
+step 10 inference time 10.184200763702393
+step 11 inference time 7.460430145263672
+step 12 inference time 14.389869451522827
+step 13 inference time 477.1044900417328
+step 14 inference time 12.95702600479126
+step 15 inference time 7.424868106842041
+step 16 inference time 7.13951301574707
+step 17 inference time 2.7361743450164795
+step 18 inference time 10.124523639678955
+step 19 inference time 104.55162692070007
+step 20 inference time 7.546741008758545
+step 21 inference time 473.1288175582886
+step 22 inference time 25.734736680984497
+step 23 inference time 5.09380578994751
+step 24 inference time 7.600756645202637
+step 25 inference time 22.878466844558716
+step 26 inference time 470.30569982528687
+step 27 inference time 2.7298636436462402
+step 28 inference time 7.273933172225952
+step 29 inference time 9.266916513442993
+step 30 inference time 2.83697772026062
+step 31 inference time 478.6643319129944
+step 32 inference time 12.443191289901733
+step 33 inference time 480.97386264801025
+step 34 inference time 17.15666174888611
+step 35 inference time 18.686693906784058
+step 36 inference time 21.392287015914917
+
+```
+
 ## Evaluation
 During evaluation, the model leverages online token merging (`run_type=eval`), achieving an inference speed of approximately 5 Hz on a single A100 GPU. By employing more advanced techniques, such as quantization, the speed can be further enhanced.
 
