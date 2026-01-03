@@ -23,6 +23,64 @@ seed = 30
 torch.manual_seed(seed)
 np.random.seed(seed)
 
+def debug_find_nav_indicator_tokens(tokenizer, candidates=None):
+    """
+    체크포인트 tokenizer vocab에서 'nav indicator'로 쓰이는 토큰이 무엇인지,
+    그리고 그 token id가 무엇인지 출력.
+    """
+    if candidates is None:
+        # Uni-NaVid 코드에서 실제로 쓰고 있는 후보를 우선 넣어두는 게 핵심
+        candidates = [
+            "[Navigation]",              # 너 코드에 있음
+            "<video_special>",
+            "</video_special>",
+            "<image_special>",
+            "</image_special>",
+            "<image_sep>",
+        ]
+
+    vocab = tokenizer.get_vocab()  # token(str) -> id(int)
+
+    print("\n========== [DEBUG] tokenizer nav/special token check ==========")
+    print("Tokenizer:", type(tokenizer))
+    print("Vocab size:", len(vocab))
+    print("BOS:", tokenizer.bos_token, tokenizer.bos_token_id)
+    print("EOS:", tokenizer.eos_token, tokenizer.eos_token_id)
+
+    # special token 맵/추가 special token들도 확인
+    try:
+        print("special_tokens_map:", tokenizer.special_tokens_map)
+        print("additional_special_tokens:", getattr(tokenizer, "additional_special_tokens", None))
+    except Exception as e:
+        print("special token map print failed:", e)
+
+    print("\n[Exact candidate lookup]")
+    for tok in candidates:
+        if tok in vocab:
+            print(f"  FOUND: {tok} -> id {vocab[tok]}")
+        else:
+            # 일부 토크나이저는 vocab에는 없고 added token으로만 관리되기도 해서
+            # convert_tokens_to_ids도 같이 찍어주는 게 안전
+            _id = tokenizer.convert_tokens_to_ids(tok)
+            print(f"  MISS in vocab: {tok} | convert_tokens_to_ids -> {_id}")
+
+    # added token 테이블에서 nav 관련만 추가로 스캔 (있으면 유용)
+    try:
+        enc = getattr(tokenizer, "added_tokens_encoder", None)
+        if enc:
+            nav_like = {k: v for k, v in enc.items()
+                        if ("nav" in k.lower()) or ("navigation" in k.lower())}
+            print("\n[Added tokens (nav-like)]")
+            if nav_like:
+                for k, v in nav_like.items():
+                    print(f"  {k} -> id {v}")
+            else:
+                print("  (none)")
+    except Exception as e:
+        print("added_tokens inspection failed:", e)
+
+    print("==============================================================\n")
+
 
 class UniNaVid_Agent():
     def __init__(self, model_path):
@@ -33,7 +91,8 @@ class UniNaVid_Agent():
 
         self.model_name = get_model_name_from_path(model_path)
         self.tokenizer, self.model, self.image_processor, self.context_len = load_pretrained_model(model_path, None, get_model_name_from_path(model_path))
-
+        debug_find_nav_indicator_tokens(self.tokenizer)
+    
         assert self.image_processor is not None
 
         print("Initialization Complete")
