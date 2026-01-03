@@ -80,7 +80,7 @@ step 33 inference time 85.42537641525269
 step 34 inference time 2.8887200355529785
 step 35 inference time 3.2006418704986572
 step 36 inference time 3.664170026779175
-
+```
 
 ## Evaluation
 During evaluation, the model leverages online token merging (`run_type=eval`), achieving an inference speed of approximately 5 Hz on a single A100 GPU. By employing more advanced techniques, such as quantization, the speed can be further enhanced.
