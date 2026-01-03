@@ -88,6 +88,7 @@ During evaluation, the model leverages online token merging (`run_type=eval`), a
 ### Online Evaluation (1fps)
 ```
 python online_eval_uninavid.py --instruction "your task" --save_gif
+```
 
 ### Offline Evaluation
 We provide the offline evaluation code of Uni-NaVid on real-world videos, including a VLN sample `vln_1` and a tracking sample `tracking_1`. You can download the sample videos from [here](https://huggingface.co/Jzzhang/Uni-NaVid/tree/main/test_cases).
