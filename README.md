@@ -172,3 +172,38 @@ Find the **EVT-bench** evaluation code [here](https://github.com/wsakobe/TrackVL
 <img width="736" height="333" alt="image" src="https://github.com/user-attachments/assets/a04308db-82c8-455d-9657-6001295a622e" />
 
 If you have any questions, feel free to email Jiazhao Zhang at zhngjizh@gmail.com.
+
+```
+
+========== [DEBUG] tokenizer nav/special token check ==========
+Tokenizer: <class 'transformers.models.llama.tokenization_llama.LlamaTokenizer'>
+Vocab size: 32006
+BOS: <s> 1
+EOS: </s> 2
+special_tokens_map: {'bos_token': '<s>', 'eos_token': '</s>', 'unk_token': '<unk>', 'pad_token': '<unk>'}
+additional_special_tokens: []
+
+[Exact candidate lookup]
+  FOUND: [Navigation] -> id 32004
+  FOUND: <video_special> -> id 32000
+  FOUND: </video_special> -> id 32001
+  FOUND: <image_special> -> id 32002
+  FOUND: </image_special> -> id 32003
+  FOUND: <image_sep> -> id 32005
+
+[Added tokens (nav-like)]
+  [Navigation] -> id 32004
+==============================================================
+
+Initialization Complete
+Total 12 images
+step 1 inference time 1.7504987716674805
+step 2 inference time 1.708193063735962
+step 3 inference time 1.475412130355835
+step 4 inference time 1.9382708072662354
+step 5 inference time 1.7091517448425293
+step 6 inference time 0.9341340065002441
+step 7 inference time 1.01513671875
+step 8 inference time 1.4768011569976807
+
+```
