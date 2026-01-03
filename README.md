@@ -174,53 +174,32 @@ Find the **EVT-bench** evaluation code [here](https://github.com/wsakobe/TrackVL
 If you have any questions, feel free to email Jiazhao Zhang at zhngjizh@gmail.com.
 
 ```
+Initialization Complete
 Total 12 images
-step 1 inference time 1.7570998668670654
+step 1 inference time 1.7787134647369385
 ['nobody.', "I'm", 'just', 'saying', 'that', "it's", 'a', 'possibility.']
-step 2 inference time 1.71097731590271
+step 2 inference time 1.756117343902588
 ['nobody', 'is', 'going', 'to', 'stop', 'us.', "We'll", 'just', 'keep', 'going', 'until', 'we', 'get', 'to', 'the', 'other', 'side.']
-step 3 inference time 1.4821712970733643
+step 3 inference time 1.508873701095581
 ['nobody', 'is', 'going', 'to', 'do', 'anything', 'about', 'it.', "I's", 'just', 'a', 'waste', 'of', 'time.']
-step 4 inference time 1.9341866970062256
+step 4 inference time 1.9979968070983887
 ['nobody.', "I'm", 'just', 'saying', 'that', "I'm", 'not', 'sure', 'if', "it's", 'a', 'good', 'idea', 'to', 'do', 'that.']
-step 5 inference time 1.7124876976013184
+step 5 inference time 1.7468583583831787
 ['nobody', 'can', 'stop', 'the', 'flow', 'of', 'information', 'in', 'the', 'digital', 'age.', '(the', 'internet,', 'social', 'media,', 'etc.).']
-step 6 inference time 0.9325017929077148
+step 6 inference time 0.9617347717285156
 ['nobody.', "I'm", 'just', 'trying', 'to', 'help', 'you.']
-step 7 inference time 1.0156676769256592
+step 7 inference time 1.040766716003418
 ['nobody', 'is', 'going', 'to', 'do', 'that.', '(laughs)']
-step 8 inference time 1.4781572818756104
+step 8 inference time 1.513587236404419
 ['nobody', 'is', 'going', 'to', 'do', 'anything', 'about', 'it.', "I's", 'just', 'a', 'waste', 'of', 'time.']
-step 9 inference time 1.012477159500122
+step 9 inference time 1.0383918285369873
 ['nobody', 'can', 'stop', 'us', 'now.', 'we', 'are', 'on', 'a', 'roll.']
-step 10 inference time 1.7084829807281494
+step 10 inference time 1.7520105838775635
 ['nobody', 'is', 'going', 'to', 'stop', 'us.', "We's", 'going', 'to', 'keep', 'going', 'until', 'we', 'get', 'what', 'we', 'want.']
-step 11 inference time 1.331838607788086
+step 11 inference time 1.3607921600341797
 ['nobody', 'is', 'going', 'to', 'be', 'ables', 'to', 'do', 'that.', '(laughter)']
-step 12 inference time 2.4887654781341553
+step 12 inference time 2.5440990924835205
 ['nobody', 'is', 'going', 'to', 'pay', 'for', 'that.', '(the', 'cost', 'of', 'the', 'product)', 'and', 'the', 'only', 'way', 'to', 'make', 'money', 'is', 'to', 'sell', 'it', 'at', 'a', 'higher', 'price.']
-root@spark-c9f0:/when2reason/Uni-NaVid# grep -R "run_type" -n uninavid/model uninavid | head -n 50
-grep: uninavid/model/__pycache__/uninavid_arch.cpython-312.pyc: binary file matches
-grep: uninavid/model/__pycache__/uninavid_arch.cpython-310.pyc: binary file matches
-grep: uninavid/model/__pycache__/uninavid_arch.cpython-312.pyc: binary file matches
-grep: uninavid/model/__pycache__/uninavid_arch.cpython-310.pyc: binary file matches
-uninavid/model/uninavid_arch.py:70:        self.config.run_type = model_args.run_type
-uninavid/model/uninavid_arch.py:298:                    if self.config.run_type == "eval":
-uninavid/model/uninavid_arch.py:368:        if self.config.run_type == "eval":
-uninavid/train/train.py:125:    run_type: Optional[str] = field(default="train") # train / eval
-uninavid/model/uninavid_arch.py:70:        self.config.run_type = model_args.run_type
-uninavid/model/uninavid_arch.py:298:                    if self.config.run_type == "eval":
-uninavid/model/uninavid_arch.py:368:        if self.config.run_type == "eval":
-root@spark-c9f0:/when2reason/Uni-NaVid# grep -R "task_type" -n uninavid/model uninavid | head -n 50
-uninavid/train/train.py:1267:            task_type="CAUSAL_LM",
-root@spark-c9f0:/when2reason/Uni-NaVid# grep -R "update_prompt" -n uninavid/model uninavid | head -n 50
-grep: uninavid/model/uninavid_arch.py:379:    def update_prompt(self, prompts=None):
-uninavid/model/__pycache__/uninavid_arch.cpython-312.pyc: binary file matches
-grep: uninavid/model/__pycache__/uninavid_arch.cpython-310.pyc: binary file matches
-grep: uninavid/model/uninavid_arch.py:379:    def update_prompt(self, prompts=None):
-uninavid/model/__pycache__/uninavid_arch.cpython-312.pyc: binary file matches
-grep: uninavid/model/__pycache__/uninavid_arch.cpython-310.pyc: binary file matches
-root@spark-c9f0:/when2reason/Uni-NaVid# 
 
 
 ```

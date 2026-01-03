@@ -272,7 +272,10 @@ class UniNaVIDMetaForCausalLM(ABC):
                 img_feat_prompt = image_features[total_count:total_count + image_counts[_idx]]
                 total_count += image_counts[_idx]
 
-            is_navigation = NAVIGATION_IDENTIFIER in prompt[0]
+            # Navigation samples can be identified either by the long-form navigation
+            # identifier string (used in data collection) or by the explicit special
+            # token "[Navigation]" (used by some inference scripts).
+            is_navigation = (NAVIGATION_IDENTIFIER in prompt[0]) or (NAVIGATION_SPECIAL_TOKEN in prompt[0])
             if is_navigation:
                 if image_counts is None or image_counts[_idx] < 1 or len(prompt) != 1: 
                     raise ValueError('[Navigation] wrong')
