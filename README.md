@@ -124,18 +124,10 @@ Find the **EVT-bench** evaluation code [here](https://github.com/wsakobe/TrackVL
 | Uni-NaVid EVT-Bench DT  | 31.9 | 50.1 | 21.3 | 
 | Uni-NaVid EVT-Bench AT   | 15.8 | 41.5 | 26.5 | 
 
-
-## Citation
-If you find this work useful for your research, please consider citing:
-```
-@article{zhang2024uni,
-    title={Uni-NaVid: A Video-based Vision-Language-Action Model for Unifying Embodied Navigation Tasks},
-    author={Zhang, Jiazhao and Wang, Kunyu and Wang, Shaoan and Li, Minghan and Liu, Haoran and Wei, Songlin and Wang, Zhongyuan and Zhang, Zhizheng and Wang, He},
-    journal={Robotics: Science and Systems},
-    year={2025}
-}
-```
-
+## Note
+- if i don't give the navigation token, it will outputs the language token not an low-level action,
+<img width="1406" height="132" alt="image" src="https://github.com/user-attachments/assets/097b9766-cac9-4a3e-991e-b0465c9b86ac" />
+<img width="736" height="333" alt="image" src="https://github.com/user-attachments/assets/a04308db-82c8-455d-9657-6001295a622e" />
 
 
 ## Acknowledgments
