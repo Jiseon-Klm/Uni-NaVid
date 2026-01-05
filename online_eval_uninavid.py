@@ -7,6 +7,9 @@ import imageio
 import torch
 import time
 import argparse
+import rclpy
+from std_msgs.msg import String
+from rclpy.node import Node
 
 # Try to import RealSense, but make it optional
 try:
@@ -186,6 +189,9 @@ class UniNaVid_Agent():
                                     
         if len(action_list)==0:
             raise ValueError("No action found in the output")
+        
+        # Accumulate actions in the queue
+        self.pending_action_list.extend(action_list)
             
         self.executed_steps += 1
             
@@ -359,12 +365,12 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='Online evaluation with camera')
     parser.add_argument('--instruction', type=str, required=True, help='Navigation instruction/task description')
-    parser.add_argument('--output_dir', type=str, default='output_dir', help='Output directory to save results (default: output_dir)')
+    parser.add_argument('--output_dir', type=str, default='Real_test_output', help='Output directory to save results (default: output_dir)')
     parser.add_argument('--max_steps', type=int, default=None, help='Maximum number of steps to process (default: unlimited)')
     parser.add_argument('--width', type=int, default=640, help='Camera width (default: 640)')
     parser.add_argument('--height', type=int, default=480, help='Camera height (default: 480)')
     parser.add_argument('--fps', type=int, default=1, help='Camera FPS for RealSense (default: 1, not used for webcam)')
-    parser.add_argument('--model_path', type=str, default='./model_zoo', help='Path to model (default: ./model_zoo)')
+    parser.add_argument('--model_path', type=str, default='./model_zoo/uninavid-7b-full-224-video-fps-1-grid-2', help='Path to model (default: ./model_zoo/uninavid-7b-full-224-video-fps-1-grid-2)')
     parser.add_argument('--save_gif', action='store_true', help='Save visualization as GIF')
     parser.add_argument('--display', action='store_true', help='Display frames in real-time')
     parser.add_argument('--camera_type', type=str, default='auto', choices=['auto', 'realsense', 'webcam'], 
@@ -377,6 +383,12 @@ if __name__ == '__main__':
     output_dir = os.path.abspath(args.output_dir)
     os.makedirs(output_dir, exist_ok=True)
     
+        #ros
+    rclpy.init(args=None)
+    ros_node = rclpy.create_node('publish_node')
+    publisher_sign = ros_node.create_publisher(String, 'sign', 10)
+    print("*" * 10 +"ROS2 Node Ready" + "*" * 10)
+
     # Initialize agent
     agent = UniNaVid_Agent(args.model_path)
     agent.reset()
@@ -466,7 +478,13 @@ if __name__ == '__main__':
             # Get trajectory and actions
             traj = result['path'][0]
             actions = result['actions']
+            print("Current frame actions:", actions)
             
+            # Publish the most recent action from pending_action_list
+            msg = String()
+            msg.data = agent.pending_action_list[-1]
+            publisher_sign.publish(msg)
+
             # Draw visualization
             vis = draw_traj_arrows_fpv(frame, actions, arrow_len=20)
             result_vis_list.append(vis)
@@ -497,7 +515,7 @@ if __name__ == '__main__':
     
     # Save results if requested
     if args.save_gif and len(result_vis_list) > 0:
-        gif_path = os.path.join(output_dir, "result.gif")
+        gif_path = os.path.join(output_dir, "indoor1.gif")
         print(f"\nSaving visualization to {gif_path}...")
         imageio.mimsave(gif_path, result_vis_list, fps=2)
         print(f"Saved {len(result_vis_list)} frames to {gif_path}")
