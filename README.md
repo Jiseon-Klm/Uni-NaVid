@@ -20,7 +20,7 @@ https://github.com/user-attachments/assets/304a512f-bfac-46e2-b293-f2e1e8b04f63 
 ## Execution
 ```
 docker run -it \
-    --name merged_navid_container \
+    --name uninavid_container \
     --privileged \
     --net=host \
     -v /dev:/dev \
@@ -30,15 +30,15 @@ docker run -it \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/aprl/Desktop/when2reason:/when2reason \
     -w /when2reason \
-    uni-navid:merged
+    uni-navid
 ```
 - reconnect the container
 ```
 # 1. 컨테이너 시작
-docker start merged_navid_container
+docker start uninavid_container
 
 # 2. 실행 중인 컨테이너에 접속
-docker exec -it merged_navid_container bash
+docker exec -it uninavid_container bash
 ```
 
 ## Reproduce result (vln/test_case)
