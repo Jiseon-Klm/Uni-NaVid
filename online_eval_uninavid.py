@@ -48,6 +48,8 @@ class UniNaVid_Agent():
         self.promt_template = "Imagine you are a robot programmed for navigation tasks. You have been given a video of historical observations and an image of the current observation <image>. Your assigned task is: '{}'. Analyze this series of images to determine your next four actions. The predicted action should be one of the following: forward, left, right, or stop."
         self.rgb_list = []
         self.count_id = 0
+        # Keep last raw model output for per-step logging/debugging (not drawn on GIF)
+        self.last_navigation_output = None
         self.reset()
 
     def process_images(self, rgb_list):
@@ -136,6 +138,7 @@ class UniNaVid_Agent():
             outputs = outputs[:-len(stop_str)]
         outputs = outputs.strip()
 
+        self.last_navigation_output = outputs
         return outputs
 
 
@@ -376,6 +379,10 @@ if __name__ == '__main__':
     parser.add_argument('--camera_type', type=str, default='auto', choices=['auto', 'realsense', 'webcam'], 
                         help='Camera type: auto (try RealSense first, fallback to webcam), realsense, or webcam (default: auto)')
     parser.add_argument('--camera_id', type=int, default=0, help='Webcam camera ID (default: 0)')
+    parser.add_argument('--no_step_log', action='store_true',
+                        help='Disable per-step JSONL logging (default: enabled)')
+    parser.add_argument('--step_log_name', type=str, default='step_log.jsonl',
+                        help='Filename for per-step JSONL log inside output_dir (default: step_log.jsonl)')
     
     args = parser.parse_args()
     
@@ -446,6 +453,13 @@ if __name__ == '__main__':
     
     result_vis_list = []
     step_count = 0
+    step_log_f = None
+    step_log_path = None
+
+    if not args.no_step_log:
+        step_log_path = os.path.join(output_dir, args.step_log_name)
+        step_log_f = open(step_log_path, 'a', encoding='utf-8')
+        print(f"Step log enabled: writing JSONL to {step_log_path}")
     
     try:
         print(f"\nStarting online evaluation with instruction: '{args.instruction}'")
@@ -488,7 +502,22 @@ if __name__ == '__main__':
 
             # Draw visualization
             vis = draw_traj_arrows_fpv(frame, actions, arrow_len=20)
-            result_vis_list.append(vis)
+            # Match offline logic: store a stable per-step frame (avoid accidental aliasing)
+            result_vis_list.append(vis.copy())
+
+            # Per-step logging (raw model output + actions)
+            if step_log_f is not None:
+                step_record = {
+                    "step": step_count,
+                    "timestamp": time.time(),
+                    "inference_time_sec": float(inference_time),
+                    "model_output_raw": agent.last_navigation_output,
+                    "actions": actions,
+                    "published_action": msg.data,
+                    "traj": traj,
+                }
+                step_log_f.write(json.dumps(step_record, ensure_ascii=False) + "\n")
+                step_log_f.flush()
             
             # Display frame if requested
             if args.display:
@@ -513,10 +542,13 @@ if __name__ == '__main__':
             cap.release()
         if args.display:
             cv2.destroyAllWindows()
+        if step_log_f is not None:
+            step_log_f.close()
     
     # Save results if requested
     if args.save_gif and len(result_vis_list) > 0:
-        gif_path = os.path.join(output_dir, "indoor1.gif")
+        # Match offline naming/convention
+        gif_path = os.path.join(output_dir, "indoor2.gif")
         print(f"\nSaving visualization to {gif_path}...")
         imageio.mimsave(gif_path, result_vis_list, fps=2)
         print(f"Saved {len(result_vis_list)} frames to {gif_path}")
