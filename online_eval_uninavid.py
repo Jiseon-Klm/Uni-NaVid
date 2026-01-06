@@ -483,6 +483,7 @@ if __name__ == '__main__':
             # Publish the most recent action from pending_action_list
             msg = String()
             msg.data = agent.pending_action_list[-1]
+            print(f"Publishing action: {msg.data} (inference time: {inference_time:.3f}s)")
             publisher_sign.publish(msg)
 
             # Draw visualization
