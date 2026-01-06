@@ -496,7 +496,7 @@ if __name__ == '__main__':
             
             # Publish the most recent action from pending_action_list
             msg = String()
-            msg.data = agent.pending_action_list[-1]
+            msg.data = actions[1]
             print(f"Publishing action: {msg.data} (inference time: {inference_time:.3f}s)")
             publisher_sign.publish(msg)
 
@@ -548,7 +548,7 @@ if __name__ == '__main__':
     # Save results if requested
     if args.save_video and len(result_vis_list) > 0:
         # Save as video (MP4)
-        video_path = os.path.join(output_dir, "indoor3.mp4")
+        video_path = os.path.join(output_dir, "demo5.mp4")
         print(f"\nSaving visualization to {video_path}...")
     
         # Get frame dimensions from first frame
