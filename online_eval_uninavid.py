@@ -374,7 +374,7 @@ if __name__ == '__main__':
     parser.add_argument('--height', type=int, default=480, help='Camera height (default: 480)')
     parser.add_argument('--fps', type=int, default=1, help='Camera FPS for RealSense (default: 1, not used for webcam)')
     parser.add_argument('--model_path', type=str, default='./model_zoo/uninavid-7b-full-224-video-fps-1-grid-2', help='Path to model (default: ./model_zoo/uninavid-7b-full-224-video-fps-1-grid-2)')
-    parser.add_argument('--save_gif', action='store_true', help='Save visualization as GIF')
+    parser.add_argument('--save_video', action='store_true', help='Save visualization as video (MP4)')
     parser.add_argument('--display', action='store_true', help='Display frames in real-time')
     parser.add_argument('--camera_type', type=str, default='auto', choices=['auto', 'realsense', 'webcam'], 
                         help='Camera type: auto (try RealSense first, fallback to webcam), realsense, or webcam (default: auto)')
@@ -546,12 +546,25 @@ if __name__ == '__main__':
             step_log_f.close()
     
     # Save results if requested
-    if args.save_gif and len(result_vis_list) > 0:
-        # Match offline naming/convention
-        gif_path = os.path.join(output_dir, "indoor2.gif")
-        print(f"\nSaving visualization to {gif_path}...")
-        imageio.mimsave(gif_path, result_vis_list, fps=2)
-        print(f"Saved {len(result_vis_list)} frames to {gif_path}")
+    if args.save_video and len(result_vis_list) > 0:
+        # Save as video (MP4)
+        video_path = os.path.join(output_dir, "indoor2.mp4")
+        print(f"\nSaving visualization to {video_path}...")
+        
+        # Get frame dimensions from first frame
+        h, w = result_vis_list[0].shape[:2]
+        
+        # Define codec and create VideoWriter
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        video_writer = cv2.VideoWriter(video_path, fourcc, 2.0, (w, h))
+        
+        # Write frames (convert RGB to BGR for OpenCV)
+        for frame in result_vis_list:
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            video_writer.write(frame_bgr)
+        
+        video_writer.release()
+        print(f"Saved {len(result_vis_list)} frames to {video_path}")
     
     print(f"\nCompleted {step_count} steps")
 
