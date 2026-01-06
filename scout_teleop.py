@@ -73,9 +73,17 @@ def get_key(settings):
     return key
 
 def print_status(status, lin, ang):
-    # end='\r' : 줄 바꿈 대신 맨 앞으로 이동
-    # flush=True : 버퍼에 담아두지 말고 즉시 화면에 출력 (이게 핵심!)
-    print(f"Status: {status:<10} | Lin: {lin:>5.2f} m/s | Ang: {ang:>5.2f} rad/s      ", end='\r', flush=True)
+    # 터미널 폭에 맞춰 줄바꿈(wrap) 방지
+    cols = shutil.get_terminal_size((80, 20)).columns
+
+    s = f"Status: {status:<10} | Lin: {lin:>5.2f} m/s | Ang: {ang:>5.2f} rad/s"
+    # 너무 길면 잘라서 wrap 자체를 못 하게 막기
+    if len(s) > cols - 1:
+        s = s[:cols - 1]
+
+    # \r: 줄 맨 앞으로, \033[2K: 현재 줄 전체 삭제
+    sys.stdout.write("\r\033[2K" + s)
+    sys.stdout.flush()
 
 def main():
     settings = termios.tcgetattr(sys.stdin)
