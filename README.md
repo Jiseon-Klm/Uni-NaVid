@@ -129,7 +129,7 @@ During evaluation, the model leverages online token merging (`run_type=eval`), a
 
 ### Online Evaluation (1fps)
 ```
-python online_eval_uninavid.py --instruction "your task" --save_gif
+python online_eval_uninavid.py --instruction "your task" --save_video
 ```
 
 ### Offline Evaluation
