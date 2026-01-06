@@ -9,13 +9,20 @@ class RobotActionController(Node):
     def __init__(self):
         super().__init__('robot_action_controller')
         
-        # 1. Subscriber (명령 받는 곳)
-        # 얘는 로봇이랑 상관없으니 그대로 둬도 됨
+        # ==================================================
+        # [수정] 1. Subscriber QoS 설정 변경
+        # 누가 보내든 다 받기 위해 Best Effort로 설정
+        # ==================================================
+        qos_profile_subscriber = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            depth=10
+        )
+
         self.subscription = self.create_subscription(
             String,
             'sign',
             self.listener_callback,
-            10
+            qos_profile_subscriber  # <-- 숫자 10 대신 이걸 넣으세요!
         )
         
         # 2. Publisher (핵심 수정!)
