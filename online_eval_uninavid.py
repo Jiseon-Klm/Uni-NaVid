@@ -548,9 +548,9 @@ if __name__ == '__main__':
     # Save results if requested
     if args.save_video and len(result_vis_list) > 0:
         # Save as video (MP4)
-        video_path = os.path.join(output_dir, "indoor2.mp4")
+        video_path = os.path.join(output_dir, "indoor3.mp4")
         print(f"\nSaving visualization to {video_path}...")
-        
+    
         # Get frame dimensions from first frame
         h, w = result_vis_list[0].shape[:2]
         
