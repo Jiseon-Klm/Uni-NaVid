@@ -4,7 +4,8 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy
 from geometry_msgs.msg import TwistStamped
 import sys, select, termios, tty
 import time
-
+import sys
+import shutil
 # ==========================================
 # ⚙️ 설정값
 # ==========================================
