@@ -73,9 +73,9 @@ def get_key(settings):
     return key
 
 def print_status(status, lin, ang):
-    # 화면을 지우지 않고 한 줄에서 갱신 (\r 사용)
-    # f-string으로 자릿수를 고정해서 글자가 깨지지 않게 함
-    print(f"Status: {status:<10} | Lin: {lin:>5.2f} m/s | Ang: {ang:>5.2f} rad/s      ", end='\r')
+    # end='\r' : 줄 바꿈 대신 맨 앞으로 이동
+    # flush=True : 버퍼에 담아두지 말고 즉시 화면에 출력 (이게 핵심!)
+    print(f"Status: {status:<10} | Lin: {lin:>5.2f} m/s | Ang: {ang:>5.2f} rad/s      ", end='\r', flush=True)
 
 def main():
     settings = termios.tcgetattr(sys.stdin)
