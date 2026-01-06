@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy
+from rclpy.qos import QoSProfile, ReliabilityPolicy  # 1. 이거 추가!
 from std_msgs.msg import String
 from geometry_msgs.msg import TwistStamped
 import time
@@ -9,7 +9,8 @@ class RobotActionController(Node):
     def __init__(self):
         super().__init__('robot_action_controller')
         
-        # Subscriber
+        # 1. Subscriber (명령 받는 곳)
+        # 얘는 로봇이랑 상관없으니 그대로 둬도 됨
         self.subscription = self.create_subscription(
             String,
             'sign',
@@ -17,30 +18,31 @@ class RobotActionController(Node):
             10
         )
         
-        # Publisher (Best Effort 유지)
+        # 2. Publisher (핵심 수정!)
+        # 로봇(Scout Mini)이 Best Effort만 받아주므로, 우리도 똑같이 맞춰야 함
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
             depth=10
         )
+
         self.publisher_ = self.create_publisher(
             TwistStamped, 
             '/scout_mini_base_controller/cmd_vel', 
-            qos_profile
+            qos_profile  # 숫자 10 대신 qos_profile 객체 사용
         )
         
-        # 0.1초마다 루프 (충분함)
+        # 3. Control Timer (0.1s = 10Hz)
+        # 로직 제어용으로는 10Hz도 충분해
         self.timer = self.create_timer(0.1, self.control_loop)
         
+        # State Variables
         self.current_twist = TwistStamped()
         self.current_twist.header.frame_id = 'base_link'
         
         self.action_end_time = 0.0
         self.is_moving = False
 
-        # [핵심] 명령 갱신 주기(0.5s)보다 약간 길게 설정 (안전 마진)
-        self.CMD_DURATION = 0.8 
-
-        self.get_logger().info("Robot Controller Ready. Duration set to 0.8s (Safety Watchdog).")
+        self.get_logger().info("Scout Mini Logic Controller Ready (Best Effort Mode). Waiting for /sign...")
 
     def listener_callback(self, msg):
         command = msg.data.lower().strip()
@@ -49,51 +51,51 @@ class RobotActionController(Node):
         new_msg = TwistStamped()
         new_msg.header.frame_id = 'base_link'
         
-        # 명령이 들어오면 무조건 시간을 갱신해줌
-        # (계속 forward가 들어오면 멈추지 않고 계속 감)
-        
+        duration = 0.0
+
+        # 속도는 좀 안전하게 0.4 정도로 맞춤
         if command in ['straight', 'forward']:
-            new_msg.twist.linear.x = 0.4  # 속도
+            new_msg.twist.linear.x = 0.4 
+            duration = 0.6
             
         elif command == 'left':
-            new_msg.twist.angular.z = 0.8 # 회전 속도
+            new_msg.twist.angular.z = 0.8
+            duration = 0.6
             
         elif command == 'right':
             new_msg.twist.angular.z = -0.8
+            duration = 0.6
             
         elif command == 'stop':
             new_msg.twist.linear.x = 0.0
             new_msg.twist.angular.z = 0.0
-            # stop은 즉시 멈춰야 하므로 duration을 짧게 주거나 즉시 만료시킴
-            # 여기선 0.0으로 둬서 다음 루프 때 바로 stop_robot() 호출되게 함
-            self.action_end_time = 0.0 
-            self.is_moving = True
-            self.current_twist = new_msg
-            return 
+            duration = 0.0 # 즉시 정지
             
         else:
+            self.get_logger().warn(f"Unknown: {command}")
             return
 
         # 상태 업데이트
         self.current_twist = new_msg
         
-        # [중요] 종료 시간 = 현재시간 + 0.8초
+        # 종료 시간 설정
         now_sec = self.get_clock().now().nanoseconds / 1e9
-        self.action_end_time = now_sec + self.CMD_DURATION
+        self.action_end_time = now_sec + duration
         self.is_moving = True
 
     def control_loop(self):
+        # 움직이는 중이 아니면 아무것도 안 함
         if not self.is_moving:
             return
 
         now_sec = self.get_clock().now().nanoseconds / 1e9
         
         if now_sec < self.action_end_time:
-            # 아직 유효 시간 안쪽이면 계속 명령 전송 (Keep Alive)
+            # 시간 갱신 (중요: Stamped 메시지는 시간이 흘러가야 함)
             self.current_twist.header.stamp = self.get_clock().now().to_msg()
             self.publisher_.publish(self.current_twist)
         else:
-            # 유효 시간(0.8초) 동안 새 명령이 안 왔다? -> 비상 정지
+            # 시간 종료 -> 정지
             self.stop_robot()
             self.is_moving = False
 
@@ -102,7 +104,7 @@ class RobotActionController(Node):
         stop_msg.header.frame_id = 'base_link'
         stop_msg.header.stamp = self.get_clock().now().to_msg()
         self.publisher_.publish(stop_msg)
-        self.get_logger().info(">> Timeout/Stop -> Robot Halted.")
+        self.get_logger().info(">> Action Finished (Stopped).")
 
 def main(args=None):
     rclpy.init(args=args)
