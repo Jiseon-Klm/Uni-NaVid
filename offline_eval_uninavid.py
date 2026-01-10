@@ -108,7 +108,7 @@ class UniNaVid_Agent():
         imgs = self.process_images(self.rgb_list)
         self.rgb_list = []
 
-        cur_prompt = f"{navigation_special_token} {question}"
+        cur_prompt = question
         with torch.inference_mode():
             self.model.update_prompt([[cur_prompt]])
             output_ids = self.model.generate(
