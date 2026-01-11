@@ -206,4 +206,27 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 # 3. bashrc에 추가 (나중에 docker exec -it /bin/bash로 들어갈 때를 위해)
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
 
+# ---- ROS2 Setup (Humble/Jazzy 대응 및 압축 플러그인 추가) ----
+RUN export UBUNTU_CODENAME=$(. /etc/os-release && echo $UBUNTU_CODENAME) && \
+    if [ "$UBUNTU_CODENAME" = "jammy" ]; then \
+        export ROS_DISTRO=humble; \
+    elif [ "$UBUNTU_CODENAME" = "noble" ]; then \
+        export ROS_DISTRO=jazzy; \
+    fi && \
+    echo "Selected ROS_DISTRO: $ROS_DISTRO for $UBUNTU_CODENAME" && \
+    apt-get update && apt-get install -y --no-install-recommends \
+    ros-${ROS_DISTRO}-ros-base \
+    ros-dev-tools \
+    python3-colcon-common-extensions \
+    ros-${ROS_DISTRO}-realsense2-camera \
+    ros-${ROS_DISTRO}-xacro \
+    # --- 압축 이미지 전송을 위한 필수 패키지 추가 ---
+    ros-${ROS_DISTRO}-image-transport \
+    ros-${ROS_DISTRO}-image-transport-plugins \
+    ros-${ROS_DISTRO}-compressed-image-transport \
+    ros-${ROS_DISTRO}-cv-bridge \
+    # --------------------------------------------
+    && rm -rf /var/lib/apt/lists/* && \
+    echo $ROS_DISTRO > /tmp/ros_distro_name
+    
 CMD ["/bin/bash"]
