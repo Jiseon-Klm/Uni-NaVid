@@ -205,3 +205,38 @@ step 12 inference time 2.5440990924835205
 ```
 <img width="747" height="655" alt="image" src="https://github.com/user-attachments/assets/dd497710-157d-405b-9814-ade02f58a12b" />
 
+```
+Publishing action: left (inference time: 0.167s)
+Step 29, inference time: 0.167s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.167s)
+Step 30, inference time: 0.167s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.167s)
+Step 31, inference time: 0.166s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.166s)
+Step 32, inference time: 0.166s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.166s)
+Step 33, inference time: 0.166s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.166s)
+Step 34, inference time: 0.168s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.168s)
+Step 35, inference time: 0.159s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.159s)
+Step 36, inference time: 0.161s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.161s)
+Step 37, inference time: 0.162s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.162s)
+Step 38, inference time: 0.162s, actions: ['left', 'left', 'left', 'left']
+Current frame actions: ['left', 'left', 'left', 'left']
+Publishing action: left (inference time: 0.162s)
+Step 39, inference time: 0.163s, actions: ['left', 'left', 'left', 'left']
+
+```
