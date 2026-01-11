@@ -203,3 +203,5 @@ step 12 inference time 2.5440990924835205
 
 
 ```
+<img width="747" height="655" alt="image" src="https://github.com/user-attachments/assets/dd497710-157d-405b-9814-ade02f58a12b" />
+
