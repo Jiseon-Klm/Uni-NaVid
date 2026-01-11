@@ -10,6 +10,7 @@ import argparse
 import rclpy
 from std_msgs.msg import String
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 
 # Try to import RealSense, but make it optional
 try:
@@ -24,7 +25,7 @@ from uninavid.model.builder import load_pretrained_model
 from uninavid.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from uninavid.conversation import conv_templates, SeparatorStyle
 from uninavid.mm_utils import tokenizer_image_token, KeywordsStoppingCriteria
-from sensor_msgs.msg import CompressedImage # 레이턴시 감소를 위해 압축 이미지 사용
+from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
 
 seed = 30
@@ -37,10 +38,13 @@ bridge = CvBridge()
 
 def image_callback(msg):
     global current_frame
-    # 압축된 ROS2 이미지를 OpenCV 형식으로 변환
-    np_arr = np.frombuffer(msg.data, np.uint8)
-    current_frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-  
+    try:
+        # 압축된 데이터를 numpy array로 변환 후 OpenCV로 디코딩
+        np_arr = np.frombuffer(msg.data, np.uint8)
+        current_frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    except Exception as e:
+        print(f"Image Decoding Error: {e}")
+        
 class UniNaVid_Agent():
     def __init__(self, model_path):
         
@@ -300,11 +304,12 @@ if __name__ == '__main__':
         depth=1 # 큐에 딱 1개만 남김
     )
     
+    # 이미지 구독자 추가 (확인된 실제 토픽명 적용)
     image_sub = ros_node.create_subscription(
-        CompressedImage, 
-        '/camera/color/image_raw/compressed',
-        image_callback, 
-        qos_profile) # 설정 적용
+    	CompressedImage, 
+    	'/camera/camera/color/image_raw/compressed',
+    	image_callback, 
+    	qos_profile)
     print("*" * 10 + " ROS2 Subscriber Ready " + "*" * 10)
     
     # 기존 카메라 초기화 코드(pipeline, cap 등)는 모두 삭제/주석 처리
