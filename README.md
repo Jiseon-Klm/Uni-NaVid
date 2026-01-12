@@ -240,3 +240,20 @@ Publishing action: left (inference time: 0.162s)
 Step 39, inference time: 0.163s, actions: ['left', 'left', 'left', 'left']
 
 ```
+- camera stream record hz
+```
+root@spark-c9f0:/when2reason/Uni-NaVid# ros2 topic hz /camera/camera/color/image_raw
+average rate: 7.688
+	min: 0.033s max: 0.200s std dev: 0.05867s window: 10
+average rate: 4.282
+	min: 0.033s max: 2.036s std dev: 0.45492s window: 17
+average rate: 4.396
+	min: 0.033s max: 2.036s std dev: 0.41868s window: 22
+average rate: 3.300
+	min: 0.033s max: 2.202s std dev: 0.56439s window: 24
+average rate: 2.998
+	min: 0.033s max: 2.202s std dev: 0.57291s window: 25
+average rate: 2.607
+	min: 0.033s max: 2.202s std dev: 0.64739s window: 28
+
+```
