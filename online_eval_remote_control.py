@@ -41,7 +41,8 @@ def image_callback(msg):
     try:
         # 압축된 데이터를 numpy array로 변환 후 OpenCV로 디코딩
         np_arr = np.frombuffer(msg.data, np.uint8)
-        current_frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        bgr_frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        current_frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
     except Exception as e:
         print(f"Image Decoding Error: {e}")
         
@@ -263,7 +264,6 @@ def draw_traj_arrows_fpv(
             )
             cv2.arrowedLine(out, start, end, arrow_color, arrow_thickness, tipLength=tipLength)
     
-    out = cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
     return out
 
 
