@@ -353,7 +353,7 @@ if __name__ == '__main__':
             
             # Publish the most recent action from pending_action_list
             msg = String()
-            msg.data = actions
+            msg.data = json.dumps(actions)
             publisher_sign.publish(msg)
             last_loop_end_time = time.time()
             print(f"Step {step_count} | Inf: {inference_time:.3f}s | Comm: {comm_delay:.3f}s | Actions: {actions}") # <====
