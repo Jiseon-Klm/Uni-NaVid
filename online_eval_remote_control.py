@@ -322,7 +322,8 @@ if __name__ == '__main__':
     step_count = 0
     step_log_f = None
     step_log_path = None
-
+    last_loop_end_time = None
+    comm_delay = 0.0 # 초기값 설정   
     if not args.no_step_log:
         step_log_path = os.path.join(output_dir, args.step_log_name)
         step_log_f = open(step_log_path, 'a', encoding='utf-8')
@@ -331,31 +332,32 @@ if __name__ == '__main__':
     try:
         print(f"\nStarting online evaluation with instruction: '{args.instruction}'")
         print("Press Ctrl+C to stop\n")
-        
         while rclpy.ok():
             rclpy.spin_once(ros_node, timeout_sec=0.01) # ROS2 이벤트 처리
             if current_frame is None:
                 continue # 프레임이 올 때까지 대기
+            loop_start_time = time.time()
+            if last_loop_end_time is not None:  # <====
+                comm_delay = loop_start_time - last_loop_end_time  # <====
+                
             frame = current_frame.copy()
             # Process frame through agent
             t_s = time.time()
-            result = agent.act({'instruction': args.instruction, 'observations': frame})
-            step_count += 1
-            
+            result = agent.act({'instruction': args.instruction, 'observations': frame})            
             inference_time = time.time() - t_s
-            print(f"Step {step_count}, inference time: {inference_time:.3f}s, actions: {result['actions']}")
-            
+            step_count += 1
+
             # Get trajectory and actions
             traj = result['path'][0]
             actions = result['actions']
-            print("Current frame actions:", actions)
             
             # Publish the most recent action from pending_action_list
             msg = String()
             msg.data = actions
-            print(f"Publishing action: {msg.data} (inference time: {inference_time:.3f}s)")
             publisher_sign.publish(msg)
-
+            last_loop_end_time = time.time()
+            print(f"Step {step_count} | Inf: {inference_time:.3f}s | Comm: {comm_delay:.3f}s | Actions: {actions}") # <====
+            
             # Draw visualization
             vis = draw_traj_arrows_fpv(frame, actions, arrow_len=20)
             # Match offline logic: store a stable per-step frame (avoid accidental aliasing)
