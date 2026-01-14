@@ -352,7 +352,7 @@ if __name__ == '__main__':
             
             # Publish the most recent action from pending_action_list
             msg = String()
-            msg.data = actions[1]
+            msg.data = actions
             print(f"Publishing action: {msg.data} (inference time: {inference_time:.3f}s)")
             publisher_sign.publish(msg)
 
