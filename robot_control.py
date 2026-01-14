@@ -60,23 +60,32 @@ class RobotActionController(Node):
         
         duration = 0.0
 
-        # 속도는 좀 안전하게 0.4 정도로 맞춤
+        MOVER_DURATION = 1.0  # 1초 동안 이동
+
         if command in ['straight', 'forward']:
-            new_msg.twist.linear.x = 0.4 
-            duration = 0.6
+            # 목표: 25cm (0.25m) 이동
+            # 속도 = 0.25m / 1.0s = 0.25
+            new_msg.twist.linear.x = 0.25 
+            duration = MOVER_DURATION
             
         elif command == 'left':
-            new_msg.twist.angular.z = 0.8
-            duration = 0.6
+            # 목표: 30도 회전 (좌회전은 +)
+            # 30도 -> 라디안 변환
+            target_angle = math.radians(30) 
+            # 각속도 = 목표각도 / 1.0s
+            new_msg.twist.angular.z = target_angle / MOVER_DURATION
+            duration = MOVER_DURATION
             
         elif command == 'right':
-            new_msg.twist.angular.z = -0.8
-            duration = 0.6
+            # 목표: 30도 회전 (우회전은 -)
+            target_angle = math.radians(30)
+            new_msg.twist.angular.z = -(target_angle / MOVER_DURATION)
+            duration = MOVER_DURATION
             
         elif command == 'stop':
             new_msg.twist.linear.x = 0.0
             new_msg.twist.angular.z = 0.0
-            duration = 0.0 # 즉시 정지
+            duration = 0.0
             
         else:
             self.get_logger().warn(f"Unknown: {command}")
