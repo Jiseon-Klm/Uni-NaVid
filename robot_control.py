@@ -4,6 +4,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy  # 1. 이거 추가!
 from std_msgs.msg import String
 from geometry_msgs.msg import TwistStamped
 import time
+import math
 
 class RobotActionController(Node):
     def __init__(self):
