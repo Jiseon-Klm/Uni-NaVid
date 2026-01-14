@@ -4,7 +4,6 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy  # 1. 이거 추가!
 from std_msgs.msg import String
 from geometry_msgs.msg import TwistStamped
 import time
-import math
 
 class RobotActionController(Node):
     def __init__(self):
@@ -59,26 +58,27 @@ class RobotActionController(Node):
         new_msg = TwistStamped()
         new_msg.header.frame_id = 'base_link'
         
+        # ==================================================
+        # [수정] 0.5초 동안 동작하도록 설정
+        # ==================================================
+        MOVER_DURATION = 0.5  # 0.5초로 변경
         duration = 0.0
 
-        MOVER_DURATION = 1.0  # 1초 동안 이동
-
         if command in ['straight', 'forward']:
-            # 목표: 25cm (0.25m) 이동
-            # 속도 = 0.25m / 1.0s = 0.25
-            new_msg.twist.linear.x = 0.25 
+            # 목표: 0.5초 동안 25cm(0.25m) 이동
+            # 속도 = 거리 / 시간 = 0.25m / 0.5s = 0.5 m/s
+            new_msg.twist.linear.x = 0.5  
             duration = MOVER_DURATION
             
         elif command == 'left':
-            # 목표: 30도 회전 (좌회전은 +)
-            # 30도 -> 라디안 변환
+            # 목표: 0.5초 동안 30도 회전
             target_angle = math.radians(30) 
-            # 각속도 = 목표각도 / 1.0s
+            # 각속도 = 목표각도 / 시간 = rad(30) / 0.5s
             new_msg.twist.angular.z = target_angle / MOVER_DURATION
             duration = MOVER_DURATION
             
         elif command == 'right':
-            # 목표: 30도 회전 (우회전은 -)
+            # 목표: 0.5초 동안 30도 회전 (우회전은 -)
             target_angle = math.radians(30)
             new_msg.twist.angular.z = -(target_angle / MOVER_DURATION)
             duration = MOVER_DURATION
@@ -91,7 +91,7 @@ class RobotActionController(Node):
         else:
             self.get_logger().warn(f"Unknown: {command}")
             return
-
+            
         # 상태 업데이트
         self.current_twist = new_msg
         
