@@ -76,20 +76,7 @@ class RobotActionController(Node):
                     # depth=1 QoS로 이미 최신 메시지만 받지만, 명시적으로 큐 업데이트
                     self.action_queue = processed_actions
                     self.new_queue_received = True
-                    
-                    # 첫 번째 메시지이거나 현재 액션이 없으면 즉시 시작
-                    # (action_end_time이 0이거나 현재 시간보다 작으면)
-                    current_time_msg = self.get_clock().now()
-                    now_sec = current_time_msg.nanoseconds / 1e9
-                    
-                    # 모든 상태 변수를 락 내에서 체크
-                    if self.action_end_time == 0.0 or now_sec >= self.action_end_time:
-                        if not self.is_moving or self.current_action_idx == -1:
-                            # 큐가 업데이트되었고 액션이 없으면 첫 액션부터 시작
-                            self.current_action_idx = 0
-                            self.new_queue_received = False
-                            # 새 큐를 받아서 실행할 때는 큐 내용도 출력
-                            self._start_next_action_locked(now_sec, current_time_msg, show_queue=True)
+                    # 실제 액션 실행은 control_loop에서만 수행 (중복 실행 방지)
                 
                 # 로그는 락 밖에서 출력 (간단한 포맷)
                 # print(f"Queue Updated: {processed_actions}")  # 필요시 주석 해제
