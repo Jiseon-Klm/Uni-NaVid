@@ -51,6 +51,7 @@ python3 online_eval_uninavid.py --instruction "Head out, turn right, and go stra
 ```
 
 - tmp
+```
 Step 1, inference time: 0.273s, actions: ['forward', 'forward', 'forward', 'forward']
 Current frame actions: ['forward', 'forward', 'forward', 'forward']
 Publishing action: forward (inference time: 0.273s)
@@ -81,4 +82,4 @@ Publishing action: right (inference time: 0.158s)
 Step 10, inference time: 0.156s, actions: ['right', 'right', 'right', 'right']
 Current frame actions: ['right', 'right', 'right', 'right']
 Publishing action: right (inference time: 0.156s)
-
+```
