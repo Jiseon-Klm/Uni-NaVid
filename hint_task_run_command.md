@@ -12,7 +12,7 @@ python3 online_eval_remote_control.py --instruction "Go straight, turn right, an
 - low-level instruction
 
 ```
-python3 online_eval_remote_control.py --instruction "You are standing facing the door at the end of the hallway. Walk straight towards that door until you get close to it. When you see a new path on your left, continue walking straight until you are about halfway past that left path, then turn right. You will see a new blue door. Walk straight towards it. That is your destination." --save_video
+python3 online_eval_remote_control.py --instruction "You are standing facing the door at the end of the hallway. Walk straight towards that door until you get close to it. When you see a new path on your left, Go straight until you reach the blue door ahead. You will see a blue door. Walk straight towards it. That is your destination." --save_video
 ```
 - human-like instruction 
 ```
