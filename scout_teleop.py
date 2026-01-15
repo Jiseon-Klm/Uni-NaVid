@@ -9,8 +9,8 @@ import shutil
 # ==========================================
 # ⚙️ 설정값
 # ==========================================
-LINEAR_SPEED = 0.8   # m/s
-ANGULAR_SPEED = 0.8  # rad/s
+LINEAR_SPEED = 0.6   # m/s
+ANGULAR_SPEED = 0.6  # rad/s
 
 # 반응 속도 튜닝
 # 입력 감지 주기 (초): 짧을수록 반응이 빠름 (0.02s = 50Hz)
@@ -18,7 +18,7 @@ POLLING_RATE = 0.02
 
 # 키 입력 유지 시간 (초): 
 # 키를 떼도 아주 잠깐 명령을 유지해서 부드럽게 주행 (0.15초 추천)
-KEY_PERSISTENCE = 0.15 
+KEY_PERSISTENCE = 0.1
 # ==========================================
 
 msg = """
@@ -27,6 +27,8 @@ msg = """
 =============================================
     [W]       Forward
  [A][S][D]    Left / Back / Right
+ [W]+[A]      Forward + Left (동시 입력)
+ [W]+[D]      Forward + Right (동시 입력)
 
   SPACE       Emergency Stop
   CTRL-C      Quit
@@ -63,13 +65,14 @@ class TeleopNode(Node):
         self.publisher_.publish(twist)
 
 def get_key(settings):
+    """키 입력을 받아서 반환 (비어있으면 None)"""
     tty.setraw(sys.stdin.fileno())
     # select 타임아웃을 POLLING_RATE로 설정해서 반응속도 높임
     rlist, _, _ = select.select([sys.stdin], [], [], POLLING_RATE)
     if rlist:
         key = sys.stdin.read(1)
     else:
-        key = ''
+        key = None
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
 
@@ -95,7 +98,8 @@ def main():
     # 상태 변수
     target_linear = 0.0
     target_angular = 0.0
-    last_key_time = 0.0 # 마지막으로 키를 누른 시간
+    pressed_keys = set()  # 현재 눌린 키들을 추적하는 집합
+    last_key_time = {}  # 각 키별로 마지막으로 누른 시간
     status_msg = "IDLE"
 
     try:
@@ -103,48 +107,78 @@ def main():
             key = get_key(settings)
             current_time = time.time()
             
-            # 1. 키 입력 처리
-            if key in ['w', 's', 'a', 'd', ' ']:
-                last_key_time = current_time # 키 누른 시간 갱신
-                
-                if key == 'w':
-                    target_linear = LINEAR_SPEED
-                    target_angular = 0.0
-                    status_msg = "FORWARD ⬆️"
-                elif key == 's':
-                    target_linear = -LINEAR_SPEED
-                    target_angular = 0.0
-                    status_msg = "BACKWARD ⬇️"
-                elif key == 'a':
-                    target_linear = 0.0
-                    target_angular = ANGULAR_SPEED
-                    status_msg = "LEFT ⬅️"
-                elif key == 'd':
-                    target_linear = 0.0
-                    target_angular = -ANGULAR_SPEED
-                    status_msg = "RIGHT ➡️"
-                elif key == ' ':
-                    target_linear = 0.0
-                    target_angular = 0.0
-                    status_msg = "STOP 🛑"
-            
-            elif key == '\x03': # Ctrl-C
+            # 1. 키 입력 처리 (키 상태 추적)
+            if key == '\x03':  # Ctrl-C
                 break
-
-            # 2. 로직 처리 (데드맨 스위치 + 잔상 효과)
-            # 키를 누른지 얼마 안 됐으면(Persistence 시간 내) -> 속도 유지
-            if (current_time - last_key_time) < KEY_PERSISTENCE:
-                pass # 값 유지
-            else:
-                # 시간이 지났으면 -> 정지
+            elif key == '\x1b':  # ESC 키 (키를 떼는 신호로 사용)
+                # ESC는 무시하거나 특별 처리
+                pass
+            elif key is not None:
+                # 키가 입력되었을 때
+                if key in ['w', 's', 'a', 'd', ' ']:
+                    if key == ' ':  # 스페이스는 즉시 정지
+                        pressed_keys.clear()
+                        target_linear = 0.0
+                        target_angular = 0.0
+                        status_msg = "STOP 🛑"
+                        last_key_time.clear()
+                    else:
+                        # 키를 누름 (집합에 추가)
+                        pressed_keys.add(key)
+                        last_key_time[key] = current_time
+            
+            # 2. 키 상태 업데이트 (떼어진 키 제거)
+            # 키 입력이 없으면 (key is None) 모든 키의 마지막 입력 시간 확인
+            # KEY_PERSISTENCE 시간이 지나면 키를 제거 (키를 떼었다고 간주)
+            keys_to_remove = []
+            for k in list(pressed_keys):  # 리스트로 복사해서 순회 (집합 변경 방지)
+                if k in last_key_time:
+                    # 키를 누른지 KEY_PERSISTENCE 시간이 지났으면 제거
+                    if (current_time - last_key_time[k]) >= KEY_PERSISTENCE:
+                        keys_to_remove.append(k)
+            for k in keys_to_remove:
+                pressed_keys.discard(k)
+                if k in last_key_time:
+                    del last_key_time[k]
+            
+            # 3. 눌린 키 조합에 따라 속도 계산
+            # 우선순위: 조합 > 단일 키
+            if 'w' in pressed_keys and 'a' in pressed_keys:
+                # 좌회전하면서 직진 (같은 시간, 같은 각속도/선속도)
+                target_linear = LINEAR_SPEED
+                target_angular = ANGULAR_SPEED
+                status_msg = "FORWARD+LEFT ↗️"
+            elif 'w' in pressed_keys and 'd' in pressed_keys:
+                # 우회전하면서 직진 (같은 시간, 같은 각속도/선속도)
+                target_linear = LINEAR_SPEED
+                target_angular = -ANGULAR_SPEED
+                status_msg = "FORWARD+RIGHT ↗️"
+            elif 'w' in pressed_keys:
+                target_linear = LINEAR_SPEED
+                target_angular = 0.0
+                status_msg = "FORWARD ⬆️"
+            elif 's' in pressed_keys:
+                target_linear = -LINEAR_SPEED
+                target_angular = 0.0
+                status_msg = "BACKWARD ⬇️"
+            elif 'a' in pressed_keys:
+                target_linear = 0.0
+                target_angular = ANGULAR_SPEED
+                status_msg = "LEFT ⬅️"
+            elif 'd' in pressed_keys:
+                target_linear = 0.0
+                target_angular = -ANGULAR_SPEED
+                status_msg = "RIGHT ➡️"
+            elif len(pressed_keys) == 0:
+                # 모든 키가 떼어졌으면 정지
                 target_linear = 0.0
                 target_angular = 0.0
                 status_msg = "IDLE ⏸️"
 
-            # 3. 명령 전송
+            # 4. 명령 전송
             node.send_velocity(target_linear, target_angular)
             
-            # 4. UI 출력 (깔끔하게 한 줄 갱신)
+            # 5. UI 출력 (깔끔하게 한 줄 갱신)
             print_status(status_msg, target_linear, target_angular)
 
     except Exception as e:
