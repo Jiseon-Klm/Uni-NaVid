@@ -39,8 +39,8 @@ class RobotActionController(Node):
         self.current_action_idx = -1
         self.action_end_time = 0.0  # 초기값을 0으로 설정하여 첫 메시지 즉시 실행
         self.is_moving = False
-        self.new_queue_received = False
-        self.last_received_queue = None  # 중복 메시지 방지용
+        self.new_queue_received = False  # 큐가 업데이트되었는지 플래그
+        self.action_step_count = 0  # 실행한 액션의 step index
 
         # 액션별 파라미터 매핑 (속도, 각속도, 지속시간)
         # MOVE_DURATION=0.5s 기준
@@ -54,9 +54,13 @@ class RobotActionController(Node):
         self.current_twist = TwistStamped()
         self.current_twist.header.frame_id = 'base_link'
 
-        self.get_logger().info("Uni-NaVid Optimized Controller Ready.")
+        print("Uni-NaVid Optimized Controller Ready.")
 
     def listener_callback(self, msg):
+        """
+        sign 토픽에서 액션 리스트를 받아 큐를 업데이트
+        논문 요구사항: 새로운 액션이 들어오면 큐를 업데이트 (이전 것은 버리고 최신 것으로)
+        """
         try:
             # 홑따옴표 처리 및 JSON 파싱
             raw_data = msg.data.replace("'", '"')
@@ -68,14 +72,10 @@ class RobotActionController(Node):
                 
                 # 모든 공유 변수 접근을 락으로 보호
                 with self.lock:
-                    # 중복 메시지 방지: 이전과 동일한 큐면 무시
-                    if processed_actions == self.last_received_queue:
-                        return  # 중복 메시지 무시
-                    
-                    # 큐 업데이트
+                    # 논문 요구사항: 새로운 액션이 들어오면 큐를 업데이트 (이전 것은 버림)
+                    # depth=1 QoS로 이미 최신 메시지만 받지만, 명시적으로 큐 업데이트
                     self.action_queue = processed_actions
                     self.new_queue_received = True
-                    self.last_received_queue = processed_actions.copy()  # 복사본 저장
                     
                     # 첫 번째 메시지이거나 현재 액션이 없으면 즉시 시작
                     # (action_end_time이 0이거나 현재 시간보다 작으면)
@@ -85,16 +85,16 @@ class RobotActionController(Node):
                     # 모든 상태 변수를 락 내에서 체크
                     if self.action_end_time == 0.0 or now_sec >= self.action_end_time:
                         if not self.is_moving or self.current_action_idx == -1:
+                            # 큐가 업데이트되었고 액션이 없으면 첫 액션부터 시작
                             self.current_action_idx = 0
                             self.new_queue_received = False
-                            self.last_received_queue = None  # 큐 처리 후 중복 체크 리셋
-                            # start_next_action도 락 내에서 호출 (내부에서 락 사용 안 함)
-                            self._start_next_action_locked(now_sec, current_time_msg)
+                            # 새 큐를 받아서 실행할 때는 큐 내용도 출력
+                            self._start_next_action_locked(now_sec, current_time_msg, show_queue=True)
                 
-                # 로그는 락 밖에서 출력 (성능 최적화)
-                self.get_logger().info(f"Queue Updated: {processed_actions}")
+                # 로그는 락 밖에서 출력 (간단한 포맷)
+                # print(f"Queue Updated: {processed_actions}")  # 필요시 주석 해제
         except Exception as e:
-            self.get_logger().error(f"Parse Error: {e}")
+            print(f"Parse Error: {e}")
 
     def control_loop(self):
         # 시간 정보 한 번만 가져오기
@@ -110,12 +110,13 @@ class RobotActionController(Node):
             stop_msg = None
             
             if action_should_transition:
-                # 새로운 큐를 받았거나, 현재 액션이 없고 큐가 있으면 시작
+                # 논문 요구사항: 액션이 끝났을 때 큐가 업데이트되었으면 첫 액션부터, 아니면 다음 액션
                 if self.new_queue_received:
+                    # 큐가 업데이트되었으면 첫 액션부터 순차적으로 실행
                     self.current_action_idx = 0
                     self.new_queue_received = False
-                    self.last_received_queue = None  # 큐 처리 후 중복 체크 리셋
-                    self._start_next_action_locked(now_sec, current_time_msg)
+                    # 새 큐를 받아서 실행할 때는 큐 내용도 출력
+                    self._start_next_action_locked(now_sec, current_time_msg, show_queue=True)
                 
                 # 현재 액션이 진행 중이고 다음 액션이 있으면 다음 액션으로
                 # 인덱스 체크와 접근을 단일 락 블록 내에서 수행
@@ -123,8 +124,9 @@ class RobotActionController(Node):
                     # 큐 길이 체크도 락 내에서 수행
                     queue_len = len(self.action_queue)
                     if self.current_action_idx < queue_len - 1:
+                        # 현재 큐에서 다음 액션 실행 (큐 내용 출력 안 함)
                         self.current_action_idx += 1
-                        self._start_next_action_locked(now_sec, current_time_msg)
+                        self._start_next_action_locked(now_sec, current_time_msg, show_queue=False)
                     # 모든 액션이 완료되었으면 정지
                     elif self.is_moving:
                         stop_msg = self._stop_robot_locked(current_time_msg)
@@ -147,11 +149,11 @@ class RobotActionController(Node):
         # 발행은 락 밖에서 수행 (성능 최적화 및 데드락 방지)
         if stop_msg is not None:
             self.publisher_.publish(stop_msg)
-            self.get_logger().info(">> Finished.")
+            print(">> Finished.")
         if twist_to_publish is not None:
             self.publisher_.publish(twist_to_publish)
 
-    def _start_next_action_locked(self, start_time, time_msg):
+    def _start_next_action_locked(self, start_time, time_msg, show_queue=False):
         """
         락이 이미 획득된 상태에서 호출되는 내부 메서드
         모든 공유 변수 접근이 락 내에서 수행됨
@@ -165,12 +167,15 @@ class RobotActionController(Node):
             idx = self.current_action_idx
             queue_len = len(self.action_queue)
             self.is_moving = False
-            # 로그는 락 밖에서 출력
-            self.get_logger().warn(f"Invalid action index: {idx}, queue length: {queue_len}")
+            # 로그는 락 밖에서 출력 (간단한 포맷)
+            print(f"Invalid action index: {idx}, queue length: {queue_len}")
             return
         
         cmd = self.action_queue[self.current_action_idx]
         params = self.ACTION_MAP.get(cmd)
+        
+        # 큐 내용 복사 (출력용)
+        queue_copy = self.action_queue.copy() if show_queue else None
 
         if params:
             v_x, v_z, duration = params
@@ -181,19 +186,26 @@ class RobotActionController(Node):
             self.current_twist.header.stamp = time_msg.to_msg()
             self.action_end_time = start_time + duration
             self.is_moving = True
-            # 로그는 락 밖에서 출력하도록 cmd 저장
+            # step index 증가 및 로그용 정보 저장
+            self.action_step_count += 1
             action_num = self.current_action_idx + 1
+            step_count = self.action_step_count
             invalid_cmd = None
         else:
             self.is_moving = False
             action_num = None
+            step_count = None
             invalid_cmd = cmd  # 로그용 저장
         
-        # 로그는 락 밖에서 출력 (성능 최적화)
+        # 로그는 락 밖에서 출력 (간단한 포맷, step index 포함)
         if invalid_cmd is not None:
-            self.get_logger().warn(f"Invalid action: {invalid_cmd}")
+            print(f"Invalid action: {invalid_cmd}")
         elif action_num is not None:
-            self.get_logger().info(f"Action [{action_num}/4]: {cmd}")
+            if show_queue and queue_copy:
+                queue_str = ' '.join(queue_copy)
+                print(f"Step {step_count}: Action [{action_num}/4] {cmd} | Queue: {queue_str}")
+            else:
+                print(f"Step {step_count}: Action [{action_num}/4] {cmd}")
 
     def _stop_robot_locked(self, time_msg):
         """
