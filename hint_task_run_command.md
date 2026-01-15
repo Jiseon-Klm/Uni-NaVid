@@ -49,3 +49,36 @@ python3 online_eval_uninavid.py --instruction "You are standing facing an open d
 ```
 python3 online_eval_uninavid.py --instruction "Head out, turn right, and go straight. Take a left at the hallway and keep walking. You'll see an emergency exit on your left—just go through there, and that's your destination." --save_video
 ```
+
+- tmp
+Step 1, inference time: 0.273s, actions: ['forward', 'forward', 'forward', 'forward']
+Current frame actions: ['forward', 'forward', 'forward', 'forward']
+Publishing action: forward (inference time: 0.273s)
+Step 2, inference time: 0.156s, actions: ['right', 'forward', 'forward', 'forward']
+Current frame actions: ['right', 'forward', 'forward', 'forward']
+Publishing action: forward (inference time: 0.156s)
+Step 3, inference time: 0.155s, actions: ['forward', 'forward', 'forward', 'forward']
+Current frame actions: ['forward', 'forward', 'forward', 'forward']
+Publishing action: forward (inference time: 0.155s)
+Step 4, inference time: 0.155s, actions: ['right', 'right', 'forward', 'forward']
+Current frame actions: ['right', 'right', 'forward', 'forward']
+Publishing action: right (inference time: 0.155s)
+Step 5, inference time: 0.156s, actions: ['right', 'right', 'forward', 'forward']
+Current frame actions: ['right', 'right', 'forward', 'forward']
+Publishing action: right (inference time: 0.156s)
+Step 6, inference time: 0.155s, actions: ['left', 'left', 'left', 'forward']
+Current frame actions: ['left', 'left', 'left', 'forward']
+Publishing action: left (inference time: 0.155s)
+Step 7, inference time: 0.158s, actions: ['right', 'right', 'right', 'forward']
+Current frame actions: ['right', 'right', 'right', 'forward']
+Publishing action: right (inference time: 0.158s)
+Step 8, inference time: 0.159s, actions: ['right', 'right', 'right', 'right']
+Current frame actions: ['right', 'right', 'right', 'right']
+Publishing action: right (inference time: 0.159s)
+Step 9, inference time: 0.158s, actions: ['right', 'right', 'right', 'right']
+Current frame actions: ['right', 'right', 'right', 'right']
+Publishing action: right (inference time: 0.158s)
+Step 10, inference time: 0.156s, actions: ['right', 'right', 'right', 'right']
+Current frame actions: ['right', 'right', 'right', 'right']
+Publishing action: right (inference time: 0.156s)
+
