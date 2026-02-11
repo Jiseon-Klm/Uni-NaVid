@@ -494,11 +494,11 @@ if __name__ == '__main__':
             actions = result['actions']
             print("Current frame actions:", actions)
             
-            # Publish the most recent action from pending_action_list
+            # Publish the full action list as JSON (matches robot_control.py expectation)
             msg = String()
-            msg.data = actions[1]
-            print(f"Publishing action: {msg.data} (inference time: {inference_time:.3f}s)")
+            msg.data = json.dumps(actions)
             publisher_sign.publish(msg)
+            print(f"Publishing actions: {actions} (inference time: {inference_time:.3f}s)")
 
             # Draw visualization
             vis = draw_traj_arrows_fpv(frame, actions, arrow_len=20)
